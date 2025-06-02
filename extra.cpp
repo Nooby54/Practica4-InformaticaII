@@ -65,8 +65,7 @@ void tablaDeEnrutamiento(map<char, Enrutador*>& red) {
 
         // Reiniciar distancias y visitados
         for (auto& nodo : red) {
-            nodo.second->distancia = INT_MAX;
-            nodo.second->visitado = false;
+            nodo.second->reinicio();
         }
 
         map<Enrutador*, Enrutador*> predecesor = dijkstra(actual);
@@ -128,3 +127,82 @@ map<Enrutador*, Enrutador*> dijkstra(Enrutador* fuente) {
     return predecesor;
 }
 
+void eliminarEnrutador(map<char, Enrutador*>& red){
+    for (const auto& par : red) {
+        Enrutador* enrutador = par.second;
+        char nombre = static_cast<char>(enrutador->idEnrut);
+
+        cout << "Enrutador " << nombre << endl;
+    }
+    bool encontrado = false;
+    do{
+        string enrutador;
+        cout << "Ingrese el enrutador que desea eliminar: ";
+        cin >> enrutador;
+        cout << endl;
+        char cEnrutador = enrutador[0];
+        auto it = red.find(cEnrutador);
+
+        if (it != red.end()) {
+            red.erase(cEnrutador);
+            encontrado = true;
+            tablaDeEnrutamiento(red);
+        }
+
+        else
+            cout << "El enrutador no existe" << endl;
+    }while(!encontrado);
+}
+
+void agregarEnrutador(map<char,Enrutador*>& red) {
+    bool agregado = false;
+    do {
+        string enrutadorStr;
+        cout << "Ingrese el enrutador que desea agregar: ";
+        cin >> enrutadorStr;
+        cout << endl;
+
+        char id = enrutadorStr[0];
+        if (red.find(id) != red.end()) {
+            cout << "El enrutador ya existe.\n";
+            continue;
+        }
+
+        Enrutador* nuevo = new Enrutador(id);
+        red[id] = nuevo;
+
+        // Conexiones con otros enrutadores existentes
+        cout << "Ahora, ingrese las conexiones desde el enrutador " << id << " a otros existentes.\n";
+        for (const auto& par : red) {
+            Enrutador* otro = par.second;
+            if (otro->idEnrut == id) continue; // no conectarse consigo mismo
+
+            cout << "Desea conectar " << id << " con " << char(otro->idEnrut) << "? (s/n): ";
+            char respuesta;
+            cin >> respuesta;
+            if (respuesta == 's') {
+                string costoStr;
+                int costo;
+                do {
+                    cout << "Ingrese el costo del enlace entre " << id << " y " << char(otro->idEnrut) << ": ";
+                    cin >> costoStr;
+                    try {
+                        costo = stoi(costoStr);
+                        if (costo <= 0) throw invalid_argument("costo inválido");
+                        break;
+                    } catch (...) {
+                        cout << "Valor inválido. Intente de nuevo.\n";
+                    }
+                } while (true);
+
+                nuevo->nuevoVecino(otro, costo);
+                otro->nuevoVecino(nuevo, costo);
+            }
+        }
+
+        tablaDeEnrutamiento(red);
+        cout << "Enrutador agregado exitosamente.\n";
+        agregado = true;
+
+    } while (!agregado);
+}
