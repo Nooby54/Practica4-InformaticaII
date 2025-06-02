@@ -13,5 +13,6 @@ vector<Enrutador*> reconstruirRuta(Enrutador* origen, Enrutador* destino, map<En
 map<Enrutador*, Enrutador*> dijkstra(Enrutador* fuente);
 void eliminarEnrutador(map<char, Enrutador*>& red);
 void agregarEnrutador(map<char,Enrutador*>& red);
+void cambiarCosto(map<char, Enrutador*>& red);
 
 #endif // EXTRA_H

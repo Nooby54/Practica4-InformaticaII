@@ -127,13 +127,16 @@ map<Enrutador*, Enrutador*> dijkstra(Enrutador* fuente) {
     return predecesor;
 }
 
-void eliminarEnrutador(map<char, Enrutador*>& red){
+void imprimirEnrutadores(map<char,Enrutador*>& red){
     for (const auto& par : red) {
         Enrutador* enrutador = par.second;
         char nombre = static_cast<char>(enrutador->idEnrut);
 
         cout << "Enrutador " << nombre << endl;
     }
+}
+void eliminarEnrutador(map<char, Enrutador*>& red){
+    imprimirEnrutadores(red);
     bool encontrado = false;
     do{
         string enrutador;
@@ -205,4 +208,65 @@ void agregarEnrutador(map<char,Enrutador*>& red) {
         agregado = true;
 
     } while (!agregado);
+}
+
+void cambiarCosto(map<char, Enrutador*>& red) {
+    imprimirEnrutadores(red);  // Asumimos que esta función imprime todos los enrutadores
+    bool encontrado = false;
+
+    do {
+        string origenStr, destinoStr;
+        cout << "Ingrese el enrutador origen: ";
+        cin >> origenStr;
+        cout << "Ingrese el enrutador destino: ";
+        cin >> destinoStr;
+
+        char cOrigen = origenStr[0];
+        char cDestino = destinoStr[0];
+
+        if (red.find(cOrigen) != red.end() && red.find(cDestino) != red.end()) {
+            Enrutador* origen = red[cOrigen];
+            Enrutador* destino = red[cDestino];
+
+            string costoStr;
+            int nuevoCosto;
+            bool costoValido = false;
+
+            do {
+                try {
+                    cout << "Ingrese el nuevo costo del enlace: ";
+                    cin >> costoStr;
+                    nuevoCosto = stoi(costoStr);
+                    if (nuevoCosto >= 0 && nuevoCosto <= INT_MAX) {
+                        costoValido = true;
+                    } else {
+                        cout << "El costo debe estar entre 0 y " << INT_MAX << ".\n";
+                    }
+                } catch (...) {
+                    cout << "Ingrese un número válido.\n";
+                }
+            } while (!costoValido);
+
+            // Cambiar el costo en ambas direcciones
+            for (auto& par : origen->vecinos) {
+                if (par.first == destino) {
+                    par.second = nuevoCosto;
+                    break;
+                }
+            }
+
+            for (auto& par : destino->vecinos) {
+                if (par.first == origen) {
+                    par.second = nuevoCosto;
+                    break;
+                }
+            }
+
+            encontrado = true;
+            tablaDeEnrutamiento(red); // Recalcular tabla
+        } else {
+            cout << "Uno o ambos enrutadores no existen. Intente de nuevo.\n";
+        }
+
+    } while (!encontrado);
 }
