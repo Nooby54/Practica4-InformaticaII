@@ -1,6 +1,8 @@
 #include "extra.h"
 
+#include <algorithm>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <map>
 #include <queue>
@@ -12,13 +14,8 @@ map<char,Enrutador*> cargarRed(string file){
     ifstream archivo(file);
     string linea;
     while (getline(archivo, linea)) {
-        if (linea.empty()) continue;
-
-        size_t separador = linea.find('|');
-        if (separador == string::npos) continue;
-
         char nombreOrigen = linea[0];
-        string vecinosStr = linea.substr(separador + 1);
+        string vecinosStr = linea.substr(2);
 
         if (red.find(nombreOrigen) == red.end()) {
             red[nombreOrigen] = new Enrutador(nombreOrigen);
@@ -33,7 +30,7 @@ map<char,Enrutador*> cargarRed(string file){
             if (parVecino.empty()) continue;
 
             size_t guion = parVecino.find('-');
-            if (guion == string::npos) continue;
+            if (guion == string::npos || guion == 0) continue;
 
             char nombreVecino = parVecino[0];
             int costo = stoi(parVecino.substr(guion + 1));
@@ -62,28 +59,72 @@ map<char,Enrutador*> cargarRed(string file){
     return red;
 }
 
-void dijkstra(Enrutador* fuente){
+void tablaDeEnrutamiento(map<char, Enrutador*>& red) {
+    for (auto iter = red.begin(); iter != red.end(); iter++) {
+        Enrutador* actual = iter->second;
 
-    fuente->distancia = 0;
+        // Reiniciar distancias y visitados
+        for (auto& nodo : red) {
+            nodo.second->distancia = INT_MAX;
+            nodo.second->visitado = false;
+        }
 
-    priority_queue<pair<int, Enrutador*>> colaEnrut; //El elemento con mayor prior (int) se pone al principio
+        map<Enrutador*, Enrutador*> predecesor = dijkstra(actual);
+        actual->tabla.clear();
 
-    colaEnrut.push({0,fuente});
-
-    while(!colaEnrut.empty()){
-        Enrutador* actual = colaEnrut.top().second;
-        colaEnrut.pop();
-
-        if(actual->visitado) continue;
-        actual->visitado = true;
-        for(auto& veci : actual->vecinos){ //Leo vecinos del router actual
-            Enrutador* sigEnrutador = veci.first;
-            int costoEnlace = veci.second;
-            int nuevaDist = actual->distancia + costoEnlace;
-            if (nuevaDist< sigEnrutador->distancia){
-                sigEnrutador->distancia = nuevaDist;
-                colaEnrut.push({-nuevaDist,sigEnrutador});
-            }
+        for (auto d = red.begin(); d != red.end(); d++) {
+            vector<Enrutador*> ruta = reconstruirRuta(actual, d->second, predecesor);
+            actual->tabla[d->second] = make_pair(d->second->distancia, ruta);
         }
     }
 }
+
+vector<Enrutador*> reconstruirRuta(Enrutador* origen, Enrutador* destino, map<Enrutador*, Enrutador*>& predecesor) {
+    vector<Enrutador*> ruta;
+    Enrutador* actual = destino;
+
+    if (predecesor.find(destino) == predecesor.end() && origen != destino) {
+        return ruta; // ruta vacía si no hay camino
+    }
+
+    while (actual != origen) {
+        ruta.push_back(actual);
+        actual = predecesor[actual];
+    }
+
+    ruta.push_back(origen);
+    reverse(ruta.begin(), ruta.end());
+    return ruta;
+}
+
+map<Enrutador*, Enrutador*> dijkstra(Enrutador* fuente) {
+    map<Enrutador*, Enrutador*> predecesor;
+
+    fuente->distancia = 0;
+
+    priority_queue<pair<int, Enrutador*>> colaEnrut;
+    colaEnrut.push({0, fuente});
+
+    while (!colaEnrut.empty()) {
+        Enrutador* actual = colaEnrut.top().second;
+        colaEnrut.pop();
+
+        if (actual->visitado) continue;
+        actual->visitado = true;
+
+        for (auto& veci : actual->vecinos) {
+            Enrutador* sigEnrutador = veci.first;
+            int costo = veci.second;
+            int nuevaDist = actual->distancia + costo;
+
+            if (nuevaDist < sigEnrutador->distancia) {
+                sigEnrutador->distancia = nuevaDist;
+                predecesor[sigEnrutador] = actual;
+                colaEnrut.push({-nuevaDist, sigEnrutador});
+            }
+        }
+    }
+
+    return predecesor;
+}
+

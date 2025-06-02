@@ -8,6 +8,8 @@
 using namespace std;
 
 map<char,Enrutador*> cargarRed(string file);
-void dijkstra(Enrutador* fuente);
+void tablaDeEnrutamiento(map<char,Enrutador*>& red);
+vector<Enrutador*> reconstruirRuta(Enrutador* origen, Enrutador* destino, map<Enrutador*, Enrutador*>& predecesor);
+map<Enrutador*, Enrutador*> dijkstra(Enrutador* fuente);
 
 #endif // EXTRA_H

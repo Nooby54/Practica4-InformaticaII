@@ -1,6 +1,7 @@
 #ifndef ENRUTADOR_H
 #define ENRUTADOR_H
 
+#include <map>
 #include <vector>
 #include <utility>
 using namespace std;
@@ -12,6 +13,7 @@ public:
     int idEnrut;
     vector<pair<Enrutador*, int>> vecinos;
     int distancia; //Distancia de este enrutador a la fuente
+    map<Enrutador*, pair<int, vector<Enrutador*>>> tabla;
     bool visitado;
 
     // Metodos
