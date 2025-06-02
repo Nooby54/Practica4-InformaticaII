@@ -160,6 +160,7 @@ void imprimirEnrutadores(map<char, Enrutador *> &red)
         cout << "Enrutador " << nombre << endl;
     }
 }
+
 void eliminarEnrutador(map<char, Enrutador *> &red)
 {
     imprimirEnrutadores(red);
@@ -450,4 +451,56 @@ void modificarRed(map<char, Enrutador *> &red)
         cout << "1. Para agregar enrutador\n2. Eliminar enrutador\n3. Gestionar enlaces\n0. Para dejar de modificar la red\nIngrese una opcion: ";
         cin >> modo;
     } while (modo != "0");
+}
+
+void conocerCosto(map<char, Enrutador *> &red)
+{
+    imprimirEnrutadores(red);
+
+    string origenStr, destinoStr;
+    cout << "Ingrese el enrutador origen: ";
+    cin >> origenStr;
+    cout << "Ingrese el enrutador destino: ";
+    cin >> destinoStr;
+
+    char cOrigen = origenStr[0];
+    char cDestino = destinoStr[0];
+
+    if (red.find(cOrigen) == red.end() || red.find(cDestino) == red.end())
+    {
+        cout << "Uno o ambos enrutadores no existen.\n";
+        return;
+    }
+
+    Enrutador *origen = red[cOrigen];
+    Enrutador *destino = red[cDestino];
+
+    auto it = origen->tabla.find(destino);
+    if (it == origen->tabla.end())
+    {
+        cout << "No existe ruta entre " << cOrigen << " y " << cDestino << ".\n";
+        return;
+    }
+
+    int costo = it->second.first;
+    const vector<Enrutador *> &ruta = it->second.second;
+
+    cout << "Destino: " << cDestino
+         << " -> Costo: " << (costo == INT_MAX ? -1 : costo)
+         << " | Ruta: ";
+
+    if (ruta.empty())
+    {
+        cout << "No hay camino\n";
+    }
+    else
+    {
+        for (size_t i = 0; i < ruta.size(); ++i)
+        {
+            cout << static_cast<char>(ruta[i]->idEnrut);
+            if (i < ruta.size() - 1)
+                cout << " -> ";
+        }
+        cout << endl;
+    }
 }

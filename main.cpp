@@ -12,7 +12,7 @@ int main()
     do
     {
         cout << "--------------------------" << endl;
-        cout << "1. Para crear la red\n2. Para cargar del archivo\n0. Para salir\nIngrese una opcion: ";
+        cout << "1. Para crear la red\n2. Para cargar del archivo\n3. Para conocer el costo y el camino entre dos nodos\n0. Para salir\nIngrese una opcion: ";
         cin >> modo;
 
         if (modo == "1")
@@ -26,8 +26,20 @@ int main()
             red = (cargarRed("../../data/archivo.txt"));
             modificarRed(red);
         }
+        else if (modo == "3")
+        {
+            if (red.size() > 1)
+            {
+                conocerCosto(red);
+            }
+            else
+            {
+                cout << "No hay una red creada o cargada aun" << endl;
+            }
+        }
         else if (modo == "0")
         {
+            cout << "Saliendo..." << endl;
             break;
         }
         else
@@ -35,15 +47,13 @@ int main()
             cout << "--------------------------" << endl;
             cout << "Modo incorrecto" << endl;
         }
-        cout << "1. Para crear la red\n2. Para cargar del archivo\n0. Para salir\nIngrese una opcion: ";
-        cin >> modo;
     } while (modo != "0");
 
-    cout << "Ya no podra modificar mas la red, ahora solo puede consultar los costos y las rutas" << endl;
-    do
+    for (auto &par : red)
     {
+        delete par.second;
+    }
+    red.clear();
 
-    } while (true);
-    //imprimirRed(red);
     return 0;
 }

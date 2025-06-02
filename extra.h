@@ -15,5 +15,6 @@ void eliminarEnrutador(map<char, Enrutador *> &red);
 void agregarEnrutador(map<char, Enrutador *> &red);
 void gestionarEnlace(map<char, Enrutador *> &red);
 void modificarRed(map<char, Enrutador *> &red);
+void conocerCosto(map<char, Enrutador *> &red);
 
 #endif // EXTRA_H
