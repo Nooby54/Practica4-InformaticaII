@@ -6,20 +6,20 @@
 #include <utility>
 using namespace std;
 
-class Enrutador{
+class Enrutador
+{
 public:
     // Atributos
     Enrutador(int id);
     int idEnrut;
-    vector<pair<Enrutador*, int>> vecinos;
-    int distancia; //Distancia de este enrutador a la fuente
-    map<Enrutador*, pair<int, vector<Enrutador*>>> tabla;
+    vector<pair<Enrutador *, int>> vecinos;
+    int distancia; // Distancia de este enrutador a la fuente
+    map<Enrutador *, pair<int, vector<Enrutador *>>> tabla;
     bool visitado;
 
     // Metodos
-    void nuevoVecino(Enrutador* vecino, int costo);
+    void nuevoVecino(Enrutador *vecino, int costo);
     void reinicio();
 };
 
 #endif // ENRUTADOR_H
-
