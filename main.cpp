@@ -12,7 +12,7 @@ int main()
     do
     {
         cout << "--------------------------" << endl;
-        cout << "1. Para crear la red\n2. Para cargar del archivo\n3. Para conocer el costo y el camino entre dos nodos\n4. Para modificar la red\n0. Para salir\nIngrese una opcion: ";
+        cout << "1. Para crear la red\n2. Para cargar red del archivo\n3. Para conocer el costo y el camino entre dos nodos\n4. Para modificar la red\n0. Para salir\nIngrese una opcion: ";
         cin >> modo;
 
         if (modo == "1")
