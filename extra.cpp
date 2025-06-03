@@ -31,9 +31,6 @@ map<char, Enrutador *> cargarRed(string file)
 
         while (getline(ss, parVecino, ','))
         {
-            if (parVecino.empty())
-                continue;
-
             size_t guion = parVecino.find('-');
             if (guion == string::npos || guion == 0)
                 continue;
@@ -49,7 +46,7 @@ map<char, Enrutador *> cargarRed(string file)
             Enrutador *vecino = red[nombreVecino];
 
             bool yaConectados = false;
-            for (const auto &par : origen->vecinos)
+            for (auto &par : origen->vecinos)
             {
                 if (par.first == vecino)
                 {
@@ -100,7 +97,7 @@ vector<Enrutador *> reconstruirRuta(Enrutador *origen, Enrutador *destino, map<E
 
     if (predecesor.find(destino) == predecesor.end() && origen != destino)
     {
-        return ruta; // ruta vacía si no hay camino
+        return ruta;
     }
 
     while (actual != origen)
@@ -130,6 +127,7 @@ map<Enrutador *, Enrutador *> dijkstra(Enrutador *fuente)
 
         if (actual->visitado)
             continue;
+
         actual->visitado = true;
 
         for (auto &veci : actual->vecinos)
@@ -155,7 +153,7 @@ void imprimirEnrutadores(map<char, Enrutador *> &red)
     for (const auto &par : red)
     {
         Enrutador *enrutador = par.second;
-        char nombre = static_cast<char>(enrutador->idEnrut);
+        char nombre = enrutador->idEnrut;
 
         cout << "Enrutador " << nombre << endl;
     }
@@ -172,9 +170,8 @@ void eliminarEnrutador(map<char, Enrutador *> &red)
         cin >> enrutador;
         cout << endl;
         char cEnrutador = enrutador[0];
-        auto it = red.find(cEnrutador);
 
-        if (it != red.end())
+        if (red.find(cEnrutador) != red.end())
         {
             red.erase(cEnrutador);
             encontrado = true;
@@ -182,7 +179,7 @@ void eliminarEnrutador(map<char, Enrutador *> &red)
         }
 
         else
-            cout << "El enrutador no existe" << endl;
+            cout << "El enrutador no existe o lo ingresaste mal" << endl;
     } while (!encontrado);
 }
 
@@ -202,55 +199,51 @@ void agregarEnrutador(map<char, Enrutador *> &red)
             cout << "El enrutador ya existe.\n";
             continue;
         }
-
-        Enrutador *nuevo = new Enrutador(id);
-        red[id] = nuevo;
-
-        // Conexiones con otros enrutadores existentes
-        if (red.size() > 1)
+        else
         {
-            cout << "Ahora, ingrese las conexiones desde el enrutador " << id << " a otros existentes.\n";
-            for (const auto &par : red)
+            Enrutador *nuevo = new Enrutador(id);
+            red[id] = nuevo;
+
+            if (red.size() > 1)
             {
-                Enrutador *otro = par.second;
-                if (otro->idEnrut == id)
-                    continue; // no conectarse consigo mismo
-
-                cout << "Desea conectar " << id << " con " << char(otro->idEnrut) << "? (s/n): ";
-                char respuesta;
-                cin >> respuesta;
-                if (respuesta == 's')
+                cout << "Ahora, ingrese las conexiones desde el enrutador " << id << " a otros existentes.\n";
+                for (const auto &par : red)
                 {
-                    string costoStr;
-                    int costo;
-                    do
-                    {
-                        cout << "Ingrese el costo del enlace entre " << id << " y " << char(otro->idEnrut) << ": ";
-                        cin >> costoStr;
-                        try
-                        {
-                            costo = stoi(costoStr);
-                            if (costo <= 0)
-                                throw invalid_argument("costo inválido");
-                            break;
-                        }
-                        catch (...)
-                        {
-                            cout << "Valor invalido. Intente de nuevo.\n";
-                        }
-                    } while (true);
+                    Enrutador *otro = par.second;
+                    if (otro->idEnrut == id)
+                        continue;
 
-                    nuevo->nuevoVecino(otro, costo);
-                    otro->nuevoVecino(nuevo, costo);
+                    cout << "Desea conectar " << id << " con " << char(otro->idEnrut) << "? (s/n): ";
+                    string respuesta;
+                    cin >> respuesta;
+                    if (respuesta == "s" || respuesta == "S")
+                    {
+                        string costoStr;
+                        int costo = -1;
+                        do
+                        {
+                            cout << "Ingrese el costo del enlace entre " << id << " y " << char(otro->idEnrut) << ": ";
+                            cin >> costoStr;
+                            try
+                            {
+                                costo = stoi(costoStr);
+                            }
+                            catch (...)
+                            {
+                                cout << "Valor invalido. Intente de nuevo.\n";
+                            }
+                        } while (costo == -1);
+
+                        nuevo->nuevoVecino(otro, costo);
+                    }
                 }
             }
+            agregado = true;
         }
-
-        tablaDeEnrutamiento(red);
-        cout << "Enrutador agregado exitosamente.\n";
-        agregado = true;
-
     } while (!agregado);
+
+    tablaDeEnrutamiento(red);
+    cout << "Enrutador agregado exitosamente.\n";
 }
 
 void gestionarEnlace(map<char, Enrutador *> &red)
@@ -275,7 +268,6 @@ void gestionarEnlace(map<char, Enrutador *> &red)
     Enrutador *origen = red[cOrigen];
     Enrutador *destino = red[cDestino];
 
-    // Verificar si ya existe el enlace
     bool existe = false;
     for (auto &par : origen->vecinos)
     {
@@ -286,8 +278,7 @@ void gestionarEnlace(map<char, Enrutador *> &red)
         }
     }
 
-    cout << "\nActualmente, el enlace " << cOrigen << " - " << cDestino
-         << (existe ? " EXISTE.\n" : " NO EXISTE.\n");
+    cout << "\nActualmente, el enlace " << cOrigen << " - " << cDestino << (existe ? " EXISTE.\n" : " NO EXISTE.\n");
 
     cout << "Que desea hacer?\n1. Agregar enlace\n2. Eliminar enlace\n3. Modificar costo\nOpcion: ";
     string opcion;
@@ -301,9 +292,8 @@ void gestionarEnlace(map<char, Enrutador *> &red)
             return;
         }
 
-        int costo;
+        int costo = -1;
         string costoStr;
-        bool valido = false;
         do
         {
             try
@@ -311,20 +301,12 @@ void gestionarEnlace(map<char, Enrutador *> &red)
                 cout << "Ingrese el costo del nuevo enlace: ";
                 cin >> costoStr;
                 costo = stoi(costoStr);
-                if (costo >= 0 && costo <= INT_MAX)
-                {
-                    valido = true;
-                }
-                else
-                {
-                    cout << "El costo debe estar entre 0 y " << INT_MAX << ".\n";
-                }
             }
             catch (...)
             {
                 cout << "Ingrese un numero valido.\n";
             }
-        } while (!valido);
+        } while (costo == -1);
 
         origen->nuevoVecino(destino, costo);
         cout << "Enlace agregado exitosamente.\n";
@@ -365,30 +347,21 @@ void gestionarEnlace(map<char, Enrutador *> &red)
             return;
         }
 
-        int costo;
+        int costo = -1;
         string costoStr;
-        bool valido = false;
         do
         {
             try
             {
-                cout << "Ingrese el nuevo costo del enlace: ";
+                cout << "Ingrese el costo del nuevo enlace: ";
                 cin >> costoStr;
                 costo = stoi(costoStr);
-                if (costo >= 0 && costo <= INT_MAX)
-                {
-                    valido = true;
-                }
-                else
-                {
-                    cout << "El costo debe estar entre 0 y " << INT_MAX << ".\n";
-                }
             }
             catch (...)
             {
                 cout << "Ingrese un numero valido.\n";
             }
-        } while (!valido);
+        } while (costo == -1);
 
         for (auto &par : origen->vecinos)
         {
@@ -422,11 +395,11 @@ void gestionarEnlace(map<char, Enrutador *> &red)
 void modificarRed(map<char, Enrutador *> &red)
 {
     string modo;
-    cout << "--------------------------" << endl;
-    cout << "1. Para agregar enrutador\n2. Eliminar enrutador\n3. Gestionar enlaces\n0. Para dejar de modificar la red\nIngrese una opcion: ";
-    cin >> modo;
     do
     {
+        cout << "--------------------------" << endl;
+        cout << "1. Para agregar enrutador\n2. Eliminar enrutador\n3. Gestionar enlaces\n0. Para dejar de modificar la red\nIngrese una opcion: ";
+        cin >> modo;
         if (modo == "1")
         {
             agregarEnrutador(red);
@@ -447,9 +420,6 @@ void modificarRed(map<char, Enrutador *> &red)
         {
             cout << "Modo incorrecto" << endl;
         }
-        cout << "--------------------------" << endl;
-        cout << "1. Para agregar enrutador\n2. Eliminar enrutador\n3. Gestionar enlaces\n0. Para dejar de modificar la red\nIngrese una opcion: ";
-        cin >> modo;
     } while (modo != "0");
 }
 
@@ -485,22 +455,13 @@ void conocerCosto(map<char, Enrutador *> &red)
     int costo = it->second.first;
     const vector<Enrutador *> &ruta = it->second.second;
 
-    cout << "Destino: " << cDestino
-         << " -> Costo: " << (costo == INT_MAX ? -1 : costo)
-         << " | Ruta: ";
+    cout << "Destino: " << cDestino << " -> Costo: " << costo << " | Ruta: ";
 
-    if (ruta.empty())
+    for (size_t i = 0; i < ruta.size(); i++)
     {
-        cout << "No hay camino\n";
+        cout << char(ruta[i]->idEnrut);
+        if (i < ruta.size() - 1)
+            cout << " -> ";
     }
-    else
-    {
-        for (size_t i = 0; i < ruta.size(); ++i)
-        {
-            cout << static_cast<char>(ruta[i]->idEnrut);
-            if (i < ruta.size() - 1)
-                cout << " -> ";
-        }
-        cout << endl;
-    }
+    cout << endl;
 }

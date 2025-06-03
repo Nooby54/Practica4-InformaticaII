@@ -12,7 +12,7 @@ int main()
     do
     {
         cout << "--------------------------" << endl;
-        cout << "1. Para crear la red\n2. Para cargar del archivo\n3. Para conocer el costo y el camino entre dos nodos\n0. Para salir\nIngrese una opcion: ";
+        cout << "1. Para crear la red\n2. Para cargar del archivo\n3. Para conocer el costo y el camino entre dos nodos\n4. Para modificar la red\n0. Para salir\nIngrese una opcion: ";
         cin >> modo;
 
         if (modo == "1")
@@ -24,7 +24,7 @@ int main()
         else if (modo == "2")
         {
             red = (cargarRed("../../data/archivo.txt"));
-            modificarRed(red);
+            cout << "Red cargada correctamente" << endl;
         }
         else if (modo == "3")
         {
@@ -36,6 +36,9 @@ int main()
             {
                 cout << "No hay una red creada o cargada aun" << endl;
             }
+        }
+        else if(modo == "4"){
+            modificarRed(red);
         }
         else if (modo == "0")
         {
